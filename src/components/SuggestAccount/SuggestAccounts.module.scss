@@ -1,0 +1,109 @@
+.wrapper {
+    padding-top: 16px;
+    border-top: 1px solid rgba(22, 24, 35, .05)
+}
+
+.label {
+    font-size: 1.4rem;
+    padding: 0 0 8px 8px;
+    font-weight: 600;
+    color: rgba(22, 24, 35, .75);
+}
+
+.error-message {
+    padding: 8px;
+    margin: 8px 0;
+    border-radius: 4px;
+    background-color: rgba(255, 59, 48, 0.1);
+    border: 1px solid rgba(255, 59, 48, 0.2);
+    
+    p {
+        font-size: 1.2rem;
+        color: rgba(255, 59, 48, 0.8);
+        margin: 0;
+    }
+}
+
+.no-data {
+    padding: 16px 8px;
+    text-align: center;
+    
+    p {
+        font-size: 1.2rem;
+        color: rgba(22, 24, 35, 0.5);
+        margin: 0;
+        font-style: italic;
+    }
+}
+
+.account-items {
+    display: flex;
+    padding: 8px;
+    border-radius: 4px;
+    transition: background-color 200ms ease-in-out 0s;
+    cursor: pointer;
+
+    &:hover {
+        background-color: rgba(22, 24, 35, .03);
+    }
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.item-info {
+    flex: 1;
+    margin-left: 12px;
+}
+
+.nickname {
+    display: flex;
+    align-items: center;
+    font-size: 1.6rem;
+    color: rgb(22, 24, 35);
+    line-height: 1;
+    
+    strong {
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis; 
+    }
+}   
+
+.icon {
+    margin-left: 4px;
+    font-size: 1.4rem;
+    color: #20d5ec;
+}
+
+.name {
+    font-size: 1.2rem;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis; 
+    color: rgba(22, 24, 35, 0.75);
+}
+
+.more-btn {
+    padding: 8px;
+    font-size: 1.4rem;
+    color: var(--primary);
+    font-weight: 600;
+    display: flex;
+
+    .btn-title {
+        cursor: pointer;
+        padding: 4px 8px 4px 0;
+        transition: opacity 0.2s ease;
+        
+        &.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+    }
+}

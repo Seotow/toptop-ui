@@ -1,0 +1,121 @@
+@import 'normalize.css';
+
+// Font emmbed
+@font-face {
+    font-family: ProximaNova;
+    src: url('/assets/fonts/Proxima-Nova-Regular.woff2');
+    font-weight: 400;
+}
+
+
+@font-face {
+    font-family: ProximaNova;
+    src: url('/assets/fonts/Proxima-Nova-Semibold.woff2');
+    font-weight: 600;
+}
+
+@font-face {
+    font-family: ProximaNova;
+    src: url('/assets/fonts/Proxima-Nova-Bold.woff2');
+    font-weight: 700;
+}
+
+@font-face {
+    font-family: SofiaPro;
+    src: url('/assets/fonts/sofiapro-bold.woff2');
+    font-weight: 700;
+}
+
+// Scrollbar css
+html *::-webkit-scrollbar {
+    width: 4px;
+    background-color: transparent;
+    border-radius: 50%;
+}
+
+html *::-webkit-scrollbar-track {
+    border-radius: 10px;
+    background: transparent;
+    border-radius: 50%;
+}
+
+html *::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: #aaa;
+    border: 1px solid #aaa;
+}
+
+// Default css
+:root {
+    --primary: #fe2c55;
+    --font-family: 'ProximaNova', 'sans-serif';
+
+    // Default layout
+    --black: #000;
+    --white: #fff;
+    --text-color: rgb(22, 24, 35);
+    --default-layout-header-height: 60px;
+    --default-layout-header-width: 1150px;
+    --default-layout-horizontal-spacer: 20px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 62.5%;
+}
+
+body {
+    font-family: var(--font-family);
+    font-size: 1.6rem;
+    line-height: 1.5;
+    text-rendering: optimizeSpeed;
+    color: var(--text-color);
+    overflow-y: overlay;
+    
+    &::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: rgba(170, 170, 170, 0.2);
+        border: 1px solid transparent
+    }
+}
+
+button, input, [tabindex] {
+    border: none;
+    outline: none;
+}
+
+a {
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+// Custom tippy tooltip 
+body {
+    .tippy-box {
+        background-color: rgb(84, 84, 84, .92);
+        font-size: 1.6rem;
+        font-weight: 600;
+        line-height: 2.2rem;
+        border-radius: 8px;
+    }
+
+    .tippy-content {
+        padding: 8px 9px;
+    }
+
+    .tippy-arrow {
+        color: rgb(84, 84, 84, .92);
+
+        &::before {
+            top: -8px
+        }
+    }
+}
