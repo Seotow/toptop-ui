@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames/bind'
 import styles from './AccountPreview.module.scss'
@@ -5,10 +6,14 @@ import Image from '~/components/Image'
 import Button from '~/components/Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleCheck } from '@fortawesome/free-solid-svg-icons'
+import * as userService from '~/services/userService'
 
 const cx = classNames.bind(styles)
 
 function AccountPreview({ data }) {
+    const [isFollowing, setIsFollowing] = useState(data?.is_followed || false)
+    const [followLoading, setFollowLoading] = useState(false)
+
     const handleNumber = (number) => {
         let result
         
@@ -26,6 +31,29 @@ function AccountPreview({ data }) {
         }
     }
 
+    const handleFollow = async () => {
+        if (followLoading || !data?.id) return
+        
+        setFollowLoading(true)
+        try {
+            if (isFollowing) {
+                const result = await userService.unfollowUser(data.id)
+                if (result.success) {
+                    setIsFollowing(false)
+                }
+            } else {
+                const result = await userService.followUser(data.id)
+                if (result.success) {
+                    setIsFollowing(true)
+                }
+            }
+        } catch (error) {
+            console.error('Follow/Unfollow error:', error)
+        } finally {
+            setFollowLoading(false)
+        }
+    }
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('header')}>
@@ -34,7 +62,15 @@ function AccountPreview({ data }) {
                     src={data.avatar}
                     alt={data.nickname}
                 />
-                <Button className={cx('follow-btn')} primary>Follow</Button>
+                <Button 
+                    className={cx('follow-btn')} 
+                    primary={!isFollowing}
+                    outline={isFollowing}
+                    onClick={handleFollow}
+                    disabled={followLoading}
+                >
+                    {followLoading ? 'Loading...' : (isFollowing ? 'Following' : 'Follow')}
+                </Button>
             </div>
             <div className={cx('body')}>
                 <p className={cx('nickname')}>

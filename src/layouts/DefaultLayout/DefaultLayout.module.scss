@@ -2,7 +2,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: #fff; // Add white background to match the theme
+    background: #f8f9fa; // Changed from white to light grey
     min-height: 100vh;
 }
 
@@ -11,10 +11,10 @@
     width: var(--default-layout-header-width);
     display: flex;
     margin-top: var(--default-layout-header-height, 60px);
-    background: #fff; // Ensure white background
+    background: #f8f9fa; // Changed from white to light grey
 }
 
 .content {
     flex: 1;
-    background: #fff; // White background for content area
+    background: #f8f9fa; // Changed from white to light grey
 }

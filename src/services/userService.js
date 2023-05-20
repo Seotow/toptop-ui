@@ -109,3 +109,24 @@ export const unfollowUser = async (userId) => {
         }
     }
 }
+
+export const getFollowings = async (page = 1) => {
+    try {
+        const res = await request.get('/me/followings', {
+            params: {
+                page
+            }
+        })
+        return {
+            success: true,
+            data: res.data || []
+        }
+    } catch (err) {
+        console.error('Get followings error:', err)
+        return {
+            success: false,
+            data: [],
+            error: err.message
+        }
+    }
+}

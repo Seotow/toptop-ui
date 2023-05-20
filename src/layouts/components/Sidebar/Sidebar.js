@@ -12,6 +12,7 @@ import {
     LiveActiveIcon,
 } from '~/components/Icons'
 import SuggestAccounts from '~/components/SuggestAccount/SuggestAccount'
+import FollowingAccounts from '~/components/FollowingAccounts'
 import * as userService from '~/services/userService'
 
 const cx = classNames.bind(styles)
@@ -65,8 +66,13 @@ function Sidebar() {
         }
     }
 
+    // Prevent wheel events from bubbling up to prevent video scroll
+    const handleSidebarScroll = (e) => {
+        e.stopPropagation()
+    }
+
     return (
-        <aside className={cx('wrapper')}>
+        <aside className={cx('wrapper')} onWheel={handleSidebarScroll}>
             <Menu>
                 <MenuItem
                     title="For You"
@@ -91,7 +97,8 @@ function Sidebar() {
                 loading={loading}
                 error={error}
             />
-            <SuggestAccounts label="Following accounts" />
+            
+            <FollowingAccounts label="Following accounts" />
         </aside>
     )
 }

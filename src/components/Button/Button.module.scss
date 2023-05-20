@@ -50,7 +50,7 @@
 
 .primary {
     background-color: var(--primary);
-    color: var(--white);
+    color: #fff; // Keep primary button text white for contrast
     border-color: var(--primary);
 
     &:hover {

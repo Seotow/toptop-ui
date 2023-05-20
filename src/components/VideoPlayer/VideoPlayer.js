@@ -1,25 +1,34 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import classNames from 'classnames/bind'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faHeart, faCommentDots, faShare, faMusic, faPlay, faPause, faVolumeUp, faVolumeXmark } from '@fortawesome/free-solid-svg-icons'
+import { faHeart, faCommentDots, faShare, faMusic, faPlay, faPause, faVolumeUp, faVolumeMute } from '@fortawesome/free-solid-svg-icons'
 import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons'
 
 import styles from './VideoPlayer.module.scss'
+import Image from '~/components/Image'
+import Button from '~/components/Button'
 import * as videoService from '~/services/videoService'
+import * as userService from '~/services/userService'
 
 const cx = classNames.bind(styles)
 
 function VideoPlayer({ video, isActive, onVideoEnd }) {
     const videoRef = useRef()
     const [isPlaying, setIsPlaying] = useState(false)
-    const [isMuted, setIsMuted] = useState(true)
+    const [volume, setVolume] = useState(0.5)
     const [isLiked, setIsLiked] = useState(video?.is_liked || false)
     const [likeCount, setLikeCount] = useState(video?.likes_count || 0)
     const [showControls, setShowControls] = useState(false)
-    const [progress, setProgress] = useState(0)
+    const [currentTime, setCurrentTime] = useState(0)
+    const [duration, setDuration] = useState(0)
     const [isFollowing, setIsFollowing] = useState(video?.user?.is_followed || false)
     const [videoError, setVideoError] = useState(null)
     const [isLoading, setIsLoading] = useState(true)
+    const [followLoading, setFollowLoading] = useState(false)
+    const [likeLoading, setLikeLoading] = useState(false)
+    const [isMuted, setIsMuted] = useState(true) // Add muted state
+    const [isDragging, setIsDragging] = useState(false) // Add drag state
+    const progressBarRef = useRef() // Add ref for progress bar
 
     // Helper function to get video URL from different possible properties
     const getVideoUrl = (videoData) => {
@@ -88,10 +97,13 @@ function VideoPlayer({ video, isActive, onVideoEnd }) {
         const video = videoRef.current
         if (!video) return
 
+        // Set initial volume
+        video.volume = volume
+
         const updateProgress = () => {
             if (video.duration) {
-                const progressPercent = (video.currentTime / video.duration) * 100
-                setProgress(progressPercent)
+                setCurrentTime(video.currentTime)
+                setDuration(video.duration)
             }
         }
 
@@ -114,7 +126,7 @@ function VideoPlayer({ video, isActive, onVideoEnd }) {
             video.removeEventListener('canplay', handleCanPlay)
             video.removeEventListener('error', handleError)
         }
-    }, [])
+    }, [volume])
 
     const handlePlayPause = () => {
         if (videoRef.current) {
@@ -128,24 +140,104 @@ function VideoPlayer({ video, isActive, onVideoEnd }) {
         }
     }
 
-    const handleMuteToggle = (e) => {
-        e.stopPropagation()
+    const handleVolumeChange = (e) => {
+        const newVolume = parseFloat(e.target.value)
+        setVolume(newVolume)
         if (videoRef.current) {
-            videoRef.current.muted = !isMuted
-            setIsMuted(!isMuted)
+            videoRef.current.volume = newVolume
         }
     }
 
+    // Handle progress bar click for seeking
+    const handleProgressClick = (e) => {
+        if (!videoRef.current || !videoRef.current.duration || isDragging) return
+        
+        const progressBar = e.currentTarget
+        const rect = progressBar.getBoundingClientRect()
+        const clickX = e.clientX - rect.left
+        const progressWidth = rect.width
+        const clickPercent = clickX / progressWidth
+        const newTime = clickPercent * videoRef.current.duration
+        
+        videoRef.current.currentTime = newTime
+    }
+
+    // Handle drag start
+    const handleMouseDown = (e) => {
+        if (!videoRef.current || !videoRef.current.duration) return
+        
+        setIsDragging(true)
+        handleProgressUpdate(e)
+        
+        // Add event listeners for drag
+        document.addEventListener('mousemove', handleMouseMove)
+        document.addEventListener('mouseup', handleMouseUp)
+    }
+
+    // Handle drag move
+    const handleMouseMove = useCallback((e) => {
+        if (!isDragging || !progressBarRef.current || !videoRef.current) return
+        
+        handleProgressUpdate(e)
+    }, [isDragging])
+
+    // Handle drag end
+    const handleMouseUp = useCallback(() => {
+        setIsDragging(false)
+        
+        // Remove event listeners
+        document.removeEventListener('mousemove', handleMouseMove)
+        document.removeEventListener('mouseup', handleMouseUp)
+    }, [handleMouseMove])
+
+    // Update progress based on mouse position
+    const handleProgressUpdate = (e) => {
+        if (!progressBarRef.current || !videoRef.current || !videoRef.current.duration) return
+        
+        const rect = progressBarRef.current.getBoundingClientRect()
+        const mouseX = e.clientX - rect.left
+        const progressWidth = rect.width
+        const clickPercent = Math.max(0, Math.min(1, mouseX / progressWidth))
+        const newTime = clickPercent * videoRef.current.duration
+        
+        videoRef.current.currentTime = newTime
+    }
+
+    // Clean up event listeners on unmount
+    useEffect(() => {
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove)
+            document.removeEventListener('mouseup', handleMouseUp)
+        }
+    }, [handleMouseMove, handleMouseUp])
+
+    const handleMuteToggle = useCallback(() => {
+        if (videoRef.current) {
+            const newMutedState = !isMuted
+            setIsMuted(newMutedState)
+            videoRef.current.muted = newMutedState
+            
+            // If unmuting and volume is 0, set to a reasonable level
+            if (!newMutedState && volume === 0) {
+                setVolume(0.5)
+                videoRef.current.volume = 0.5
+            }
+        }
+    }, [isMuted, volume])
+
     const handleLike = async () => {
+        if (likeLoading) return
+        
+        setLikeLoading(true)
         try {
             if (isLiked) {
-                const result = await videoService.unlikeVideo(video.id)
+                const result = await videoService.unlikeVideo(video.id || video.uuid)
                 if (result.success) {
                     setIsLiked(false)
-                    setLikeCount(prev => prev - 1)
+                    setLikeCount(prev => Math.max(0, prev - 1))
                 }
             } else {
-                const result = await videoService.likeVideo(video.id)
+                const result = await videoService.likeVideo(video.id || video.uuid)
                 if (result.success) {
                     setIsLiked(true)
                     setLikeCount(prev => prev + 1)
@@ -153,16 +245,36 @@ function VideoPlayer({ video, isActive, onVideoEnd }) {
             }
         } catch (error) {
             console.error('Like/Unlike error:', error)
+        } finally {
+            setLikeLoading(false)
         }
     }
 
     const handleFollow = async () => {
-        // This would typically call a follow/unfollow API
-        setIsFollowing(!isFollowing)
+        if (followLoading || !video?.user?.id) return
+        
+        setFollowLoading(true)
+        try {
+            if (isFollowing) {
+                const result = await userService.unfollowUser(video.user.id)
+                if (result.success) {
+                    setIsFollowing(false)
+                }
+            } else {
+                const result = await userService.followUser(video.user.id)
+                if (result.success) {
+                    setIsFollowing(true)
+                }
+            }
+        } catch (error) {
+            console.error('Follow/Unfollow error:', error)
+        } finally {
+            setFollowLoading(false)
+        }
     }
 
     const handleVideoEnd = () => {
-        setProgress(0)
+        setCurrentTime(0)
         onVideoEnd && onVideoEnd()
     }
 
@@ -218,7 +330,7 @@ function VideoPlayer({ video, isActive, onVideoEnd }) {
                     ref={videoRef}
                     className={cx('video')}
                     loop
-                    muted={isMuted}
+                    muted={isMuted} // Use isMuted state
                     playsInline
                     src={videoUrl}
                     poster={thumbnailUrl}
@@ -233,37 +345,82 @@ function VideoPlayer({ video, isActive, onVideoEnd }) {
                         <button className={cx('play-btn')} onClick={handlePlayPause}>
                             <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
                         </button>
-                        <button className={cx('mute-btn')} onClick={handleMuteToggle}>
-                            <FontAwesomeIcon icon={isMuted ? faVolumeXmark : faVolumeUp} />
-                        </button>
                     </div>
                 )}
 
-                <div className={cx('progress-bar')}>
+                {/* Progress bar */}
+                <div 
+                    className={cx('progress-bar')} 
+                    onClick={handleProgressClick}
+                    onMouseDown={handleMouseDown}
+                    title="Click or drag to seek"
+                    ref={progressBarRef}
+                >
                     <div 
                         className={cx('progress')} 
-                        style={{ width: `${progress}%` }}
+                        style={{ width: `${(currentTime / duration) * 100}%` }}
                     />
+                </div>
+
+                {/* Volume control */}
+                <div className={cx('volume-control')}>
+                    <button 
+                        className={cx('mute-btn')} 
+                        onClick={handleMuteToggle}
+                        title={isMuted ? 'Unmute' : 'Mute'}
+                    >
+                        {isMuted || volume === 0 ? (
+                            <FontAwesomeIcon icon={faVolumeMute} />
+                        ) : volume < 0.5 ? (
+                            <FontAwesomeIcon icon={faVolumeUp} />
+                        ) : (
+                            <FontAwesomeIcon icon={faVolumeUp} />
+                        )}
+                    </button>
+                    <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.1"
+                        value={isMuted ? 0 : volume}
+                        onChange={handleVolumeChange}
+                        className={cx('volume-slider')}
+                        disabled={isMuted}
+                        title={`Volume: ${Math.round((isMuted ? 0 : volume) * 100)}%`}
+                    />
+                    <span className={cx('volume-label')}>
+                        {Math.round((isMuted ? 0 : volume) * 100)}%
+                    </span>
                 </div>
             </div>
 
             <div className={cx('video-info')}>
                 <div className={cx('author-info')}>
-                    <img 
+                    <Image 
                         className={cx('avatar')} 
                         src={video?.user?.avatar} 
-                        alt={video?.user?.nickname}
+                        alt={video?.user?.nickname || 'User avatar'}
                     />
                     <div className={cx('author-details')}>
-                        <h3 className={cx('nickname')}>{video?.user?.nickname}</h3>
-                        <p className={cx('name')}>{video?.user?.first_name} {video?.user?.last_name}</p>
+                        <h3 className={cx('nickname')}>{video?.user?.nickname || 'Unknown User'}</h3>
+                        <p className={cx('name')}>
+                            {video?.user?.first_name && video?.user?.last_name 
+                                ? `${video.user.first_name} ${video.user.last_name}`
+                                : video?.user?.full_name || video?.user?.nickname
+                            }
+                        </p>
                     </div>
-                    <button 
-                        className={cx('follow-btn', { following: isFollowing })}
-                        onClick={handleFollow}
-                    >
-                        {isFollowing ? 'Following' : 'Follow'}
-                    </button>
+                    {!isFollowing && (
+                        <Button
+                            className={cx('follow-btn')}
+                            outline
+                            small
+                            onClick={handleFollow}
+                            disabled={followLoading}
+                        >
+                            {followLoading ? 'Following...' : 'Follow'}
+                        </Button>
+                    )}
                 </div>
 
                 <div className={cx('video-description')}>
@@ -279,8 +436,9 @@ function VideoPlayer({ video, isActive, onVideoEnd }) {
 
             <div className={cx('action-buttons')}>
                 <button 
-                    className={cx('action-btn', { liked: isLiked })} 
+                    className={cx('action-btn', { liked: isLiked, loading: likeLoading })} 
                     onClick={handleLike}
+                    disabled={likeLoading}
                 >
                     <FontAwesomeIcon icon={isLiked ? faHeart : faHeartRegular} />
                     <span>{likeCount}</span>

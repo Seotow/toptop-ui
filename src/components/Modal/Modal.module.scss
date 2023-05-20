@@ -13,7 +13,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: white;
+    background: #f8f9fa; // Changed from white to light grey
     width: 483px;
     max-height: 693px;
     height: 80%;
@@ -112,7 +112,7 @@
     align-items: center;
     -webkit-box-pack: center;
     justify-content: center;
-    background: rgb(255, 255, 255);
+    background: #f1f3f4; // Changed from white to grey
     border-bottom: 1px solid rgba(22, 24, 35, 0.12);
     border-top-color: rgba(22, 24, 35, 0.12);
     border-right-color: rgba(22, 24, 35, 0.12);

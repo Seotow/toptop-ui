@@ -5,6 +5,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faCommentDots, faBookmark, faShare, faVolumeUp, faVolumeMute, faPlay, faPause } from '@fortawesome/free-solid-svg-icons';
 import styles from './Video.module.scss';
 import Button from '~/components/Button';
+import * as userService from '~/services/userService';
+import * as videoService from '~/services/videoService';
 
 const cx = classNames.bind(styles);
 
@@ -26,8 +28,12 @@ function Video({ data, autoPlay = false, muted = true, onVideoEnd }) {
     const [showControls, setShowControls] = useState(false);
     const [hasError, setHasError] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-    const [isLiked, setIsLiked] = useState(false);
+    const [isLiked, setIsLiked] = useState(data?.is_liked || false);
     const [isBookmarked, setIsBookmarked] = useState(false);
+    const [isFollowing, setIsFollowing] = useState(data?.user?.is_followed || false);
+    const [likesCount, setLikesCount] = useState(data?.likes_count || 0);
+    const [followLoading, setFollowLoading] = useState(false);
+    const [likeLoading, setLikeLoading] = useState(false);
     const navigate = useNavigate();
 
     // Extract video URLs with more fallbacks and logging
@@ -149,26 +155,74 @@ function Video({ data, autoPlay = false, muted = true, onVideoEnd }) {
         }
     };
 
-    const handleLikeClick = () => {
-        setIsLiked(prev => !prev);
-        // Add API call to like/unlike the video
+    const handleCommentClick = (e) => {
+        e?.stopPropagation();
+        // TODO: Implement comment functionality
+        console.log('Comment clicked for video:', data?.id || data?.uuid);
     };
 
-    const handleBookmarkClick = () => {
-        setIsBookmarked(prev => !prev);
-        // Add API call to bookmark/unbookmark the video
+    const handleBookmarkClick = (e) => {
+        e?.stopPropagation();
+        setIsBookmarked(!isBookmarked);
+        // TODO: Implement bookmark functionality
+        console.log('Bookmark clicked for video:', data?.id || data?.uuid);
     };
 
-    const handleFollowClick = () => {
-        // Add API call to follow/unfollow the user
+    const handleShareClick = (e) => {
+        e?.stopPropagation();
+        // TODO: Implement share functionality
+        console.log('Share clicked for video:', data?.id || data?.uuid);
     };
 
-    const handleCommentClick = () => {
-        // Navigate to comments section or open comments modal
+    const handleLikeClick = async () => {
+        if (likeLoading) return;
+        
+        setLikeLoading(true);
+        const videoId = data?.id || data?.uuid;
+        
+        try {
+            if (isLiked) {
+                const result = await videoService.unlikeVideo(videoId);
+                if (result.success) {
+                    setIsLiked(false);
+                    setLikesCount(prev => Math.max(0, prev - 1));
+                }
+            } else {
+                const result = await videoService.likeVideo(videoId);
+                if (result.success) {
+                    setIsLiked(true);
+                    setLikesCount(prev => prev + 1);
+                }
+            }
+        } catch (error) {
+            console.error('Error toggling like:', error);
+        } finally {
+            setLikeLoading(false);
+        }
     };
 
-    const handleShareClick = () => {
-        // Implement share functionality
+    const handleFollowClick = async () => {
+        if (followLoading || !data?.user?.id) return;
+        
+        setFollowLoading(true);
+        
+        try {
+            if (isFollowing) {
+                const result = await userService.unfollowUser(data.user.id);
+                if (result.success) {
+                    setIsFollowing(false);
+                }
+            } else {
+                const result = await userService.followUser(data.user.id);
+                if (result.success) {
+                    setIsFollowing(true);
+                }
+            }
+        } catch (error) {
+            console.error('Error toggling follow:', error);
+        } finally {
+            setFollowLoading(false);
+        }
     };
 
     if (!videoUrl) {
@@ -254,14 +308,17 @@ function Video({ data, autoPlay = false, muted = true, onVideoEnd }) {
                         <p className={cx('fullname')}>{data.user?.full_name || data.user?.nickname}</p>
                     </div>
                     
-                    <Button
-                        className={cx('follow-btn')}
-                        outline
-                        small
-                        onClick={handleFollowClick}
-                    >
-                        Follow
-                    </Button>
+                    {!isFollowing && (
+                        <Button
+                            className={cx('follow-btn')}
+                            outline
+                            small
+                            onClick={handleFollowClick}
+                            disabled={followLoading}
+                        >
+                            {followLoading ? 'Following...' : 'Follow'}
+                        </Button>
+                    )}
                 </div>
 
                 <div className={cx('description')}>
@@ -276,10 +333,10 @@ function Video({ data, autoPlay = false, muted = true, onVideoEnd }) {
                 {/* Action buttons */}
                 <div className={cx('actions')}>
                     <div className={cx('action-item')} onClick={handleLikeClick}>
-                        <div className={cx('action-btn', { liked: isLiked })}>
+                        <div className={cx('action-btn', { liked: isLiked, loading: likeLoading })}>
                             <FontAwesomeIcon icon={faHeart} />
                         </div>
-                        <span className={cx('action-count')}>{formatCount(data.likes_count)}</span>
+                        <span className={cx('action-count')}>{formatCount(likesCount)}</span>
                     </div>
 
                     <div className={cx('action-item')} onClick={handleCommentClick}>

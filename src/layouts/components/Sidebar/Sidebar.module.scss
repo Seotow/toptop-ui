@@ -1,4 +1,32 @@
 .wrapper {
     width: 356px;
     padding: 20px 0 26px 8px;
+    height: calc(100vh - var(--default-layout-header-height, 60px));
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: sticky;
+    top: var(--default-layout-header-height, 60px);
+    
+    /* Custom scrollbar for sidebar */
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    &::-webkit-scrollbar-track {
+        background: rgba(22, 24, 35, 0.06);
+        border-radius: 3px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+        background: rgba(22, 24, 35, 0.2);
+        border-radius: 3px;
+        
+        &:hover {
+            background: rgba(22, 24, 35, 0.3);
+        }
+    }
+    
+    /* Ensure smooth scrolling */
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
 }
