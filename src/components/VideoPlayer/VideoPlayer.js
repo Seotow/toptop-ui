@@ -1,7 +1,16 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import classNames from 'classnames/bind'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faHeart, faCommentDots, faShare, faMusic, faPlay, faPause, faVolumeUp, faVolumeMute } from '@fortawesome/free-solid-svg-icons'
+import {
+    faHeart,
+    faCommentDots,
+    faShare,
+    faMusic,
+    faPlay,
+    faPause,
+    faVolumeUp,
+    faVolumeMute,
+} from '@fortawesome/free-solid-svg-icons'
 import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons'
 
 import styles from './VideoPlayer.module.scss'
@@ -12,7 +21,7 @@ import * as userService from '~/services/userService'
 
 const cx = classNames.bind(styles)
 
-function VideoPlayer({ video, isActive, onVideoEnd }) {
+function VideoPlayer({ video, isActive, onVideoEnd, onCommentsToggle }) {
     const videoRef = useRef()
     const [isPlaying, setIsPlaying] = useState(false)
     const [volume, setVolume] = useState(0.5)
@@ -28,12 +37,13 @@ function VideoPlayer({ video, isActive, onVideoEnd }) {
     const [likeLoading, setLikeLoading] = useState(false)
     const [isMuted, setIsMuted] = useState(true) // Add muted state
     const [isDragging, setIsDragging] = useState(false) // Add drag state
+    const [showComments, setShowComments] = useState(false) // Add comments state
     const progressBarRef = useRef() // Add ref for progress bar
 
     // Helper function to get video URL from different possible properties
     const getVideoUrl = (videoData) => {
         if (!videoData) return null
-        
+
         // Try different possible property names for video URL
         const possibleUrls = [
             videoData.file_url,
@@ -41,27 +51,27 @@ function VideoPlayer({ video, isActive, onVideoEnd }) {
             videoData.url,
             videoData.src,
             videoData.video?.file_url,
-            videoData.video?.url
+            videoData.video?.url,
         ]
-        
-        const validUrl = possibleUrls.find(url => url && typeof url === 'string')
+
+        const validUrl = possibleUrls.find((url) => url && typeof url === 'string')
         return validUrl
     }
 
     // Helper function to get thumbnail URL
     const getThumbnailUrl = (videoData) => {
         if (!videoData) return null
-        
+
         const possibleThumbnails = [
             videoData.thumb_url,
             videoData.thumbnail_url,
             videoData.thumbnail,
             videoData.poster,
             videoData.video?.thumb_url,
-            videoData.video?.thumbnail
+            videoData.video?.thumbnail,
         ]
-        
-        return possibleThumbnails.find(url => url && typeof url === 'string')
+
+        return possibleThumbnails.find((url) => url && typeof url === 'string')
     }
 
     const videoUrl = getVideoUrl(video)
@@ -76,13 +86,14 @@ function VideoPlayer({ video, isActive, onVideoEnd }) {
     useEffect(() => {
         if (isActive && videoRef.current && videoUrl) {
             setIsLoading(true)
-            videoRef.current.play()
+            videoRef.current
+                .play()
                 .then(() => {
                     setIsPlaying(true)
                     setIsLoading(false)
                     setVideoError(null)
                 })
-                .catch(error => {
+                .catch((error) => {
                     console.error('Video play error:', error)
                     setVideoError(`Failed to play video: ${error.message}`)
                     setIsLoading(false)
@@ -119,7 +130,7 @@ function VideoPlayer({ video, isActive, onVideoEnd }) {
         video.addEventListener('loadstart', handleLoadStart)
         video.addEventListener('canplay', handleCanPlay)
         video.addEventListener('error', handleError)
-        
+
         return () => {
             video.removeEventListener('timeupdate', updateProgress)
             video.removeEventListener('loadstart', handleLoadStart)
@@ -151,40 +162,43 @@ function VideoPlayer({ video, isActive, onVideoEnd }) {
     // Handle progress bar click for seeking
     const handleProgressClick = (e) => {
         if (!videoRef.current || !videoRef.current.duration || isDragging) return
-        
+
         const progressBar = e.currentTarget
         const rect = progressBar.getBoundingClientRect()
         const clickX = e.clientX - rect.left
         const progressWidth = rect.width
         const clickPercent = clickX / progressWidth
         const newTime = clickPercent * videoRef.current.duration
-        
+
         videoRef.current.currentTime = newTime
     }
 
     // Handle drag start
     const handleMouseDown = (e) => {
         if (!videoRef.current || !videoRef.current.duration) return
-        
+
         setIsDragging(true)
         handleProgressUpdate(e)
-        
+
         // Add event listeners for drag
         document.addEventListener('mousemove', handleMouseMove)
         document.addEventListener('mouseup', handleMouseUp)
     }
 
     // Handle drag move
-    const handleMouseMove = useCallback((e) => {
-        if (!isDragging || !progressBarRef.current || !videoRef.current) return
-        
-        handleProgressUpdate(e)
-    }, [isDragging])
+    const handleMouseMove = useCallback(
+        (e) => {
+            if (!isDragging || !progressBarRef.current || !videoRef.current) return
+
+            handleProgressUpdate(e)
+        },
+        [isDragging],
+    )
 
     // Handle drag end
     const handleMouseUp = useCallback(() => {
         setIsDragging(false)
-        
+
         // Remove event listeners
         document.removeEventListener('mousemove', handleMouseMove)
         document.removeEventListener('mouseup', handleMouseUp)
@@ -193,13 +207,13 @@ function VideoPlayer({ video, isActive, onVideoEnd }) {
     // Update progress based on mouse position
     const handleProgressUpdate = (e) => {
         if (!progressBarRef.current || !videoRef.current || !videoRef.current.duration) return
-        
+
         const rect = progressBarRef.current.getBoundingClientRect()
         const mouseX = e.clientX - rect.left
         const progressWidth = rect.width
         const clickPercent = Math.max(0, Math.min(1, mouseX / progressWidth))
         const newTime = clickPercent * videoRef.current.duration
-        
+
         videoRef.current.currentTime = newTime
     }
 
@@ -216,7 +230,7 @@ function VideoPlayer({ video, isActive, onVideoEnd }) {
             const newMutedState = !isMuted
             setIsMuted(newMutedState)
             videoRef.current.muted = newMutedState
-            
+
             // If unmuting and volume is 0, set to a reasonable level
             if (!newMutedState && volume === 0) {
                 setVolume(0.5)
@@ -227,20 +241,20 @@ function VideoPlayer({ video, isActive, onVideoEnd }) {
 
     const handleLike = async () => {
         if (likeLoading) return
-        
+
         setLikeLoading(true)
         try {
             if (isLiked) {
                 const result = await videoService.unlikeVideo(video.id || video.uuid)
                 if (result.success) {
                     setIsLiked(false)
-                    setLikeCount(prev => Math.max(0, prev - 1))
+                    setLikeCount((prev) => Math.max(0, prev - 1))
                 }
             } else {
                 const result = await videoService.likeVideo(video.id || video.uuid)
                 if (result.success) {
                     setIsLiked(true)
-                    setLikeCount(prev => prev + 1)
+                    setLikeCount((prev) => prev + 1)
                 }
             }
         } catch (error) {
@@ -252,7 +266,7 @@ function VideoPlayer({ video, isActive, onVideoEnd }) {
 
     const handleFollow = async () => {
         if (followLoading || !video?.user?.id) return
-        
+
         setFollowLoading(true)
         try {
             if (isFollowing) {
@@ -285,6 +299,20 @@ function VideoPlayer({ video, isActive, onVideoEnd }) {
         }
     }
 
+    const handleCommentClick = (e) => {
+        e?.stopPropagation()
+        console.log('Comment button clicked, current showComments:', showComments)
+        const newShowComments = !showComments
+        setShowComments(newShowComments)
+
+        // Notify parent component about comments toggle
+        if (onCommentsToggle) {
+            onCommentsToggle(newShowComments)
+        }
+
+        console.log('Comments panel should now be visible:', newShowComments)
+    }
+
     if (!video) {
         return (
             <div className={cx('video-player')}>
@@ -307,16 +335,14 @@ function VideoPlayer({ video, isActive, onVideoEnd }) {
             </div>
         )
     }
-
     return (
-        <div className={cx('video-player')}>
+        <div className={cx('video-player', { 'with-comments': showComments })}>
             <div className={cx('video-container')}>
                 {isLoading && (
                     <div className={cx('loading-overlay')}>
                         <div className={cx('spinner')}></div>
                     </div>
                 )}
-                
                 {videoError && (
                     <div className={cx('error-overlay')}>
                         <div className={cx('error-message')}>
@@ -325,7 +351,6 @@ function VideoPlayer({ video, isActive, onVideoEnd }) {
                         </div>
                     </div>
                 )}
-
                 <video
                     ref={videoRef}
                     className={cx('video')}
@@ -339,7 +364,6 @@ function VideoPlayer({ video, isActive, onVideoEnd }) {
                     onMouseEnter={() => setShowControls(true)}
                     onMouseLeave={() => setShowControls(false)}
                 />
-                
                 {!videoError && (
                     <div className={cx('controls', { show: showControls })}>
                         <button className={cx('play-btn')} onClick={handlePlayPause}>
@@ -347,28 +371,19 @@ function VideoPlayer({ video, isActive, onVideoEnd }) {
                         </button>
                     </div>
                 )}
-
                 {/* Progress bar */}
-                <div 
-                    className={cx('progress-bar')} 
+                <div
+                    className={cx('progress-bar')}
                     onClick={handleProgressClick}
                     onMouseDown={handleMouseDown}
                     title="Click or drag to seek"
                     ref={progressBarRef}
                 >
-                    <div 
-                        className={cx('progress')} 
-                        style={{ width: `${(currentTime / duration) * 100}%` }}
-                    />
+                    <div className={cx('progress')} style={{ width: `${(currentTime / duration) * 100}%` }} />
                 </div>
-
                 {/* Volume control */}
                 <div className={cx('volume-control')}>
-                    <button 
-                        className={cx('mute-btn')} 
-                        onClick={handleMuteToggle}
-                        title={isMuted ? 'Unmute' : 'Mute'}
-                    >
+                    <button className={cx('mute-btn')} onClick={handleMuteToggle} title={isMuted ? 'Unmute' : 'Mute'}>
                         {isMuted || volume === 0 ? (
                             <FontAwesomeIcon icon={faVolumeMute} />
                         ) : volume < 0.5 ? (
@@ -388,71 +403,64 @@ function VideoPlayer({ video, isActive, onVideoEnd }) {
                         disabled={isMuted}
                         title={`Volume: ${Math.round((isMuted ? 0 : volume) * 100)}%`}
                     />
-                    <span className={cx('volume-label')}>
-                        {Math.round((isMuted ? 0 : volume) * 100)}%
-                    </span>
+                    <span className={cx('volume-label')}>{Math.round((isMuted ? 0 : volume) * 100)}%</span>
                 </div>
-            </div>
-
-            <div className={cx('video-info')}>
-                <div className={cx('author-info')}>
-                    <Image 
-                        className={cx('avatar')} 
-                        src={video?.user?.avatar} 
-                        alt={video?.user?.nickname || 'User avatar'}
-                    />
-                    <div className={cx('author-details')}>
-                        <h3 className={cx('nickname')}>{video?.user?.nickname || 'Unknown User'}</h3>
-                        <p className={cx('name')}>
-                            {video?.user?.first_name && video?.user?.last_name 
-                                ? `${video.user.first_name} ${video.user.last_name}`
-                                : video?.user?.full_name || video?.user?.nickname
-                            }
-                        </p>
-                    </div>
-                    {!isFollowing && (
-                        <Button
-                            className={cx('follow-btn')}
-                            outline
-                            small
-                            onClick={handleFollow}
-                            disabled={followLoading}
-                        >
-                            {followLoading ? 'Following...' : 'Follow'}
-                        </Button>
-                    )}
-                </div>
-
-                <div className={cx('video-description')}>
-                    <p>{video?.description}</p>
-                    {video?.music && (
-                        <div className={cx('music-info')}>
-                            <FontAwesomeIcon icon={faMusic} />
-                            <span>{video.music}</span>
+                {/* Video info and action buttons as overlays */}
+                <div className={cx('video-info')}>
+                    <div className={cx('author-info')}>
+                        <Image
+                            className={cx('avatar')}
+                            src={video?.user?.avatar}
+                            alt={video?.user?.nickname || 'User avatar'}
+                        />
+                        <div className={cx('author-details')}>
+                            <h3 className={cx('nickname')}>{video?.user?.nickname || 'Unknown User'}</h3>
+                            <p className={cx('name')}>
+                                {video?.user?.first_name && video?.user?.last_name
+                                    ? `${video.user.first_name} ${video.user.last_name}`
+                                    : video?.user?.full_name || video?.user?.nickname}
+                            </p>
                         </div>
-                    )}
+                        {!isFollowing && (
+                            <Button
+                                className={cx('follow-btn')}
+                                outline
+                                small
+                                onClick={handleFollow}
+                                disabled={followLoading}
+                            >
+                                {followLoading ? 'Following...' : 'Follow'}
+                            </Button>
+                        )}
+                    </div>
+
+                    <div className={cx('video-description')}>
+                        <p>{video?.description}</p>
+                        {video?.music && (
+                            <div className={cx('music-info')}>
+                                <FontAwesomeIcon icon={faMusic} />
+                                <span>{video.music}</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
-
-            <div className={cx('action-buttons')}>
-                <button 
-                    className={cx('action-btn', { liked: isLiked, loading: likeLoading })} 
-                    onClick={handleLike}
-                    disabled={likeLoading}
-                >
-                    <FontAwesomeIcon icon={isLiked ? faHeart : faHeartRegular} />
-                    <span>{likeCount}</span>
-                </button>
-
-                <button className={cx('action-btn')}>
-                    <FontAwesomeIcon icon={faCommentDots} />
-                    <span>{video?.comments_count || 0}</span>
-                </button>
-
-                <button className={cx('action-btn')}>
-                    <FontAwesomeIcon icon={faShare} />
-                    <span>Share</span>
-                </button>
+                <div className={cx('action-buttons')}>
+                    <button
+                        className={cx('action-btn', { liked: isLiked, loading: likeLoading })}
+                        onClick={handleLike}
+                        disabled={likeLoading}
+                    >
+                        <FontAwesomeIcon icon={isLiked ? faHeart : faHeartRegular} />
+                        <span>{likeCount}</span>
+                    </button>
+                    <button className={cx('action-btn')} onClick={handleCommentClick}>
+                        <FontAwesomeIcon icon={faCommentDots} />
+                        <span>{video?.comments_count || 0}</span>
+                    </button>{' '}
+                    <button className={cx('action-btn')}>
+                        <FontAwesomeIcon icon={faShare} />
+                        <span>Share</span>
+                    </button>                </div>
             </div>
         </div>
     )

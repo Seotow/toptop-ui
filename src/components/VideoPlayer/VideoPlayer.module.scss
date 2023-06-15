@@ -2,20 +2,24 @@
     width: 100%;
     height: 100%; 
     display: flex;
-    position: relative;
+    flex-direction: row;
+    position: relative; 
     background: transparent;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: stretch;
+    transform: none;
 
     .video-container {
-        width: 100%;
+        width: auto; 
         height: 100%; 
         aspect-ratio: 9/16; 
         max-height: 100%; 
         position: relative;
         border-radius: 16px; 
         overflow: hidden;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15); 
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        flex-shrink: 0; // Prevent video from shrinking
+        transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
 
         .video {
             width: 100%;
@@ -462,6 +466,13 @@
 // Mobile responsive
 @media (max-width: 768px) {
     .video-player {
+        flex-direction: column; // Stack vertically on mobile
+        
+        // On mobile, don't move the video player since comments will be bottom overlay
+        &.with-comments {
+            transform: none; // Reset transform on mobile
+        }
+        
         .video-container {
             width: 100%;
             height: 100vh;

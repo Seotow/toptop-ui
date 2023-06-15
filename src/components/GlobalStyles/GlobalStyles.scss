@@ -49,13 +49,11 @@ html *::-webkit-scrollbar-thumb {
 :root {
     --primary: #fe2c55;
     --font-family: 'ProximaNova', 'sans-serif';
-
-    // Default layout
     --black: #000;
     --white: #fff;
     --text-color: rgb(22, 24, 35);
     --default-layout-header-height: 60px;
-    --default-layout-header-width: 1150px;
+    --default-layout-header-width: 1400px; // Increased from 1150px to accommodate sidebar + video + comments
     --default-layout-horizontal-spacer: 20px;
 }
 

@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faCommentDots, faBookmark, faShare, faVolumeUp, faVolumeMute, faPlay, faPause } from '@fortawesome/free-solid-svg-icons';
 import styles from './Video.module.scss';
 import Button from '~/components/Button';
+import Comments from '~/components/Comments';
 import * as userService from '~/services/userService';
 import * as videoService from '~/services/videoService';
 
@@ -27,13 +28,13 @@ function Video({ data, autoPlay = false, muted = true, onVideoEnd }) {
     const [progress, setProgress] = useState(0);
     const [showControls, setShowControls] = useState(false);
     const [hasError, setHasError] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isLiked, setIsLiked] = useState(data?.is_liked || false);
+    const [isLoading, setIsLoading] = useState(true);    const [isLiked, setIsLiked] = useState(data?.is_liked || false);
     const [isBookmarked, setIsBookmarked] = useState(false);
     const [isFollowing, setIsFollowing] = useState(data?.user?.is_followed || false);
     const [likesCount, setLikesCount] = useState(data?.likes_count || 0);
     const [followLoading, setFollowLoading] = useState(false);
     const [likeLoading, setLikeLoading] = useState(false);
+    const [showComments, setShowComments] = useState(false);
     const navigate = useNavigate();
 
     // Extract video URLs with more fallbacks and logging
@@ -153,12 +154,9 @@ function Video({ data, autoPlay = false, muted = true, onVideoEnd }) {
         if (e.target === videoRef.current) {
             togglePlay(e);
         }
-    };
-
-    const handleCommentClick = (e) => {
+    };    const handleCommentClick = (e) => {
         e?.stopPropagation();
-        // TODO: Implement comment functionality
-        console.log('Comment clicked for video:', data?.id || data?.uuid);
+        setShowComments(true);
     };
 
     const handleBookmarkClick = (e) => {
@@ -351,9 +349,7 @@ function Video({ data, autoPlay = false, muted = true, onVideoEnd }) {
                             <FontAwesomeIcon icon={faBookmark} />
                         </div>
                         <span className={cx('action-count')}>{formatCount(data.views_count)}</span>
-                    </div>
-
-                    <div className={cx('action-item')} onClick={handleShareClick}>
+                    </div>                    <div className={cx('action-item')} onClick={handleShareClick}>
                         <div className={cx('action-btn')}>
                             <FontAwesomeIcon icon={faShare} />
                         </div>
@@ -361,6 +357,13 @@ function Video({ data, autoPlay = false, muted = true, onVideoEnd }) {
                     </div>
                 </div>
             </div>
+
+            {/* Comments Panel */}
+            <Comments 
+                video={data}
+                isVisible={showComments}
+                onClose={() => setShowComments(false)}
+            />
         </div>
     );
 };

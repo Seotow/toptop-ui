@@ -50,13 +50,16 @@ export const getVideos = async ({ type = 'for-you', page = 1, except = null }) =
 
 export const getVideo = async (videoId) => {
     try {
-        const res = await request.get(`/posts/${videoId}`)
+        console.log('🎬 Fetching video with ID:', videoId)
+        const res = await request.get(`/videos/${videoId}`)
+        console.log('🎬 Get video response:', res.data)
         return {
             success: true,
             data: res.data
         }
     } catch (err) {
-        console.error('Get video error:', err)
+        console.error('❌ Get video error:', err)
+        console.error('❌ Error response:', err.response?.data)
         return {
             success: false,
             data: null,
@@ -67,13 +70,16 @@ export const getVideo = async (videoId) => {
 
 export const likeVideo = async (videoId) => {
     try {
-        const res = await request.post(`/posts/${videoId}/like`)
+        console.log('👍 Liking video with ID:', videoId)
+        const res = await request.post(`/videos/${videoId}/like`)
+        console.log('👍 Like video response:', res.data)
         return {
             success: true,
             data: res.data
         }
     } catch (err) {
-        console.error('Like video error:', err)
+        console.error('❌ Like video error:', err)
+        console.error('❌ Error response:', err.response?.data)
         return {
             success: false,
             error: err.message
@@ -83,13 +89,16 @@ export const likeVideo = async (videoId) => {
 
 export const unlikeVideo = async (videoId) => {
     try {
-        const res = await request.post(`/posts/${videoId}/unlike`)
+        console.log('👎 Unliking video with ID:', videoId)
+        const res = await request.post(`/videos/${videoId}/unlike`)
+        console.log('👎 Unlike video response:', res.data)
         return {
             success: true,
             data: res.data
         }
     } catch (err) {
-        console.error('Unlike video error:', err)
+        console.error('❌ Unlike video error:', err)
+        console.error('❌ Error response:', err.response?.data)
         return {
             success: false,
             error: err.message
@@ -99,13 +108,16 @@ export const unlikeVideo = async (videoId) => {
 
 export const getComments = async (videoId) => {
     try {
-        const res = await request.get(`/posts/${videoId}/comments`)
+        console.log('💬 Fetching comments for video ID:', videoId)
+        const res = await request.get(`/videos/${videoId}/comments`)
+        console.log('💬 Get comments response:', res.data)
         return {
             success: true,
             data: res.data || []
         }
     } catch (err) {
-        console.error('Get comments error:', err)
+        console.error('❌ Get comments error:', err)
+        console.error('❌ Error response:', err.response?.data)
         return {
             success: false,
             data: [],
@@ -116,15 +128,57 @@ export const getComments = async (videoId) => {
 
 export const createComment = async (videoId, comment) => {
     try {
-        const res = await request.post(`/posts/${videoId}/comments`, {
+        console.log('💬 Creating comment for video ID:', videoId, 'Comment:', comment)
+        const res = await request.post(`/videos/${videoId}/comments`, {
             comment
         })
+        console.log('💬 Create comment response:', res.data)
         return {
             success: true,
             data: res.data
         }
     } catch (err) {
-        console.error('Create comment error:', err)
+        console.error('❌ Create comment error:', err)
+        console.error('❌ Error response:', err.response?.data)
+        return {
+            success: false,
+            error: err.message
+        }
+    }
+}
+
+// Comment like/unlike functions
+export const likeComment = async (videoId, commentId) => {
+    try {
+        console.log('👍 Liking comment with ID:', commentId, 'for video:', videoId)
+        const res = await request.post(`/comments/${commentId}/like`)
+        console.log('👍 Like comment response:', res.data)
+        return {
+            success: true,
+            data: res.data
+        }
+    } catch (err) {
+        console.error('❌ Like comment error:', err)
+        console.error('❌ Error response:', err.response?.data)
+        return {
+            success: false,
+            error: err.message
+        }
+    }
+}
+
+export const unlikeComment = async (videoId, commentId) => {
+    try {
+        console.log('👎 Unliking comment with ID:', commentId, 'for video:', videoId)
+        const res = await request.post(`/comments/${commentId}/unlike`)
+        console.log('👎 Unlike comment response:', res.data)
+        return {
+            success: true,
+            data: res.data
+        }
+    } catch (err) {
+        console.error('❌ Unlike comment error:', err)
+        console.error('❌ Error response:', err.response?.data)
         return {
             success: false,
             error: err.message
