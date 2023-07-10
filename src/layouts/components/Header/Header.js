@@ -1,5 +1,3 @@
-import { useContext } from 'react'
-import { StoreContext } from '~/store'
 import { Link } from 'react-router-dom'
 import { useAppContext } from '~/store'
 

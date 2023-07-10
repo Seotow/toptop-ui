@@ -73,16 +73,23 @@ body {
     line-height: 1.5;
     text-rendering: optimizeSpeed;
     color: var(--text-color);
-    overflow-y: overlay;
+    overflow-y: scroll;
     
+    // Hide main window scrollbar while maintaining functionality
     &::-webkit-scrollbar {
-        width: 10px;
+        width: 0px;
+        background: transparent;
     }
 
     &::-webkit-scrollbar-thumb {
-        background: rgba(170, 170, 170, 0.2);
-        border: 1px solid transparent
+        background: transparent;
     }
+    
+    // For Firefox
+    scrollbar-width: none;
+    
+    // For IE and Edge
+    -ms-overflow-style: none;
 }
 
 button, input, [tabindex] {
@@ -116,4 +123,41 @@ body {
             top: -8px
         }
     }
+}
+
+// Prevent unwanted scroll behavior in video areas
+.video-container,
+.video-wrapper,
+.video-player {
+    overflow: hidden;
+    
+    // Prevent wheel events from bubbling up to window
+    &:hover {
+        overscroll-behavior: contain;
+    }
+}
+
+// Prevent scrolling in interactive areas that might interfere
+.action-btn,
+.action-item,
+.controls,
+.progress-bar,
+.volume-control,
+.comments-panel,
+.edit-form,
+.modal-content {
+    // Prevent wheel events from causing page scroll
+    overscroll-behavior: contain;
+}
+
+// Hide scrollbars in all containers but maintain scroll functionality
+html {
+    // Hide scrollbar for Chrome, Safari and Opera
+    &::-webkit-scrollbar {
+        display: none;
+    }
+    
+    // Hide scrollbar for IE, Edge and Firefox
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }

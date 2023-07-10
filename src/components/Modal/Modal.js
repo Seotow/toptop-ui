@@ -6,6 +6,7 @@ import classNames from 'classnames/bind'
 import styles from './Modal.module.scss'
 import { faXmark } from '@fortawesome/free-solid-svg-icons'
 import Login from './ModalType/Login'
+import SignUp from './ModalType/SignUp'
 import ChannelItem from './ChannelItem'
 import { FacebookIcon, GoogleIcon, LineIcon, QRIcon, TwitterIcon, UserIcon } from '~/components/Icons'
 import { useEffect } from 'react'
@@ -16,104 +17,84 @@ const Modal = ({ isModalShowing, toggleShowModal, onLoginSuccess }) => {
     const [isLoginModal, setIsLoginModal] = useState(true)
     const [history, setHistory] = useState([])
 
-    const loginModal = {
-        title: 'Log in to TopTop',
-        channelList: [
-            {
-                title: 'Use email or username',
-                icon: <UserIcon />,
-                isDisabled: false,
-                children: {
-                    title: 'Log in',
-                    body: <Login onSuccess={onLoginSuccess} onClose={toggleShowModal} />,
-                },
-            },
-            {
-                title: 'Use QR Code',
-                icon: <QRIcon />,
-                isDisabled: true,
-            },
-            {
-                title: 'Continue with facebook',
-                icon: <FacebookIcon />,
-                isDisabled: true,
-            },
-            {
-                title: 'Continue with google',
-                icon: <GoogleIcon />,
-                isDisabled: true,
-            },
-            {
-                title: 'Continue with Twitter',
-                icon: <TwitterIcon />,
-                isDisabled: true,
-            },
-            {
-                title: 'Continue with Line',
-                icon: <LineIcon />,
-                isDisabled: true,
-            },
-            {
-                title: 'Continue with Twitter',
-                icon: <TwitterIcon />,
-                isDisabled: true,
-            },
-            {
-                title: 'Continue with Line',
-                icon: <LineIcon />,
-                isDisabled: true,
-            },
-            {
-                title: 'Continue with Twitter',
-                icon: <TwitterIcon />,
-                isDisabled: true,
-            },
-            {
-                title: 'Continue with Line',
-                icon: <LineIcon />,
-                isDisabled: true,
-            },
-        ],
-        footer: {},
-    }
-
-    const signupModal = {
-        title: 'Sign up for TopTop',
-        channelList: [
-            {
-                title: 'Use email or username',
-                icon: <UserIcon />,
-                isDisabled: false,
-                children: {
-                    title: 'Sign up',
-                    body: <Login onSuccess={onLoginSuccess} onClose={toggleShowModal} />,
-                },
-            },
-            {
-                title: 'Use QR Code',
-                icon: <QRIcon />,
-                isDisabled: true,
-            },
-            {
-                title: 'Continue with facebook',
-                icon: <FacebookIcon />,
-                isDisabled: true,
-            },
-            {
-                title: 'Continue with google',
-                icon: <GoogleIcon />,
-                isDisabled: true,
-            },
-        ],
-    }
-
     // Initialize history with the current modal
     useEffect(() => {
+        const loginModal = {
+            title: 'Log in to TopTop',
+            channelList: [
+                {
+                    title: 'Use email or username',
+                    icon: <UserIcon />,
+                    isDisabled: false,
+                    children: {
+                        title: 'Log in',
+                        body: <Login onSuccess={onLoginSuccess} onClose={toggleShowModal} />,
+                    },
+                },
+                {
+                    title: 'Use QR Code',
+                    icon: <QRIcon />,
+                    isDisabled: true,
+                },
+                {
+                    title: 'Continue with facebook',
+                    icon: <FacebookIcon />,
+                    isDisabled: true,
+                },
+                {
+                    title: 'Continue with google',
+                    icon: <GoogleIcon />,
+                    isDisabled: true,
+                },
+                {
+                    title: 'Continue with Twitter',
+                    icon: <TwitterIcon />,
+                    isDisabled: true,
+                },
+                {
+                    title: 'Continue with Line',
+                    icon: <LineIcon />,
+                    isDisabled: true,
+                },
+            ],
+            footer: {},
+        }
+
+        const signupModal = {
+            title: 'Sign up for TopTop',
+            channelList: [
+                {
+                    title: 'Use email or username',
+                    icon: <UserIcon />,
+                    isDisabled: false,
+                    children: {
+                        title: 'Sign up',
+                        body: <SignUp onSuccess={onLoginSuccess} onClose={toggleShowModal} />,
+                    },
+                },
+                {
+                    title: 'Use QR Code',
+                    icon: <QRIcon />,
+                    isDisabled: true,
+                },
+                {
+                    title: 'Continue with facebook',
+                    icon: <FacebookIcon />,
+                    isDisabled: true,
+                },
+                {
+                    title: 'Continue with google',
+                    icon: <GoogleIcon />,
+                    isDisabled: true,
+                },
+            ],
+        }
+
         const modal = isLoginModal ? loginModal : signupModal
         setHistory([modal])
-    }, [isLoginModal, onLoginSuccess])
+    }, [isLoginModal, onLoginSuccess, toggleShowModal])
 
-    const current = history[history.length - 1] || (isLoginModal ? loginModal : signupModal)
+    const current = history[history.length - 1]
 
     const renderItems = () => {
         if (current.channelList) {

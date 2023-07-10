@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { getCookie, removeCookie, removeLocalStorage } from './storage'
+import { getCookie, removeCookie } from './storage'
 
 const httpRequest = axios.create({
     baseURL: process.env.REACT_APP_BASE_URL || 'https://tiktok.fullstack.edu.vn/api',
@@ -84,6 +84,15 @@ export const post = async (path, payload, options = {}) => {
 export const put = async (path, payload, options = {}) => {
     try {
         const response = await httpRequest.put(path, payload, options)
+        return response.data
+    } catch (error) {
+        throw error
+    }
+}
+
+export const patch = async (path, payload, options = {}) => {
+    try {
+        const response = await httpRequest.patch(path, payload, options)
         return response.data
     } catch (error) {
         throw error

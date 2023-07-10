@@ -63,13 +63,19 @@ export const searchUsers = async (q, type = 'less') => {
 
 export const getUser = async (nickname) => {
     try {
+        console.log('🔍 Fetching user profile for:', nickname)
         const res = await request.get(`/users/@${nickname}`)
+        
+        console.log('👤 User profile response:', res.data)
+        console.log('👤 User profile structure:', Object.keys(res.data || {}))
+        
         return {
             success: true,
             data: res.data
         }
     } catch (err) {
-        console.error('Get user error:', err)
+        console.error('❌ Get user error:', err)
+        console.error('❌ Error response:', err.response?.data)
         return {
             success: false,
             data: null,
@@ -127,6 +133,26 @@ export const getFollowings = async (page = 1) => {
             success: false,
             data: [],
             error: err.message
+        }
+    }
+}
+
+export const updateProfile = async (formData) => {
+    try {
+        const res = await request.patch('/auth/me', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+        return {
+            success: true,
+            data: res.data
+        }
+    } catch (err) {
+        console.error('Update profile error:', err)
+        return {
+            success: false,
+            error: err.response?.data?.message || err.message || 'Failed to update profile'
         }
     }
 }

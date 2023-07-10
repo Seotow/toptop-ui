@@ -62,3 +62,26 @@ export const refreshToken = async () => {
         }
     }
 }
+
+export const register = async (payload) => {
+    try {
+        const res = await request.post('/auth/register', {
+            type: 'email',
+            email: payload.email,
+            password: payload.password
+        })
+        return {
+            success: true,
+            data: res.data,
+            token: res.meta?.token,
+            message: 'Registration successful'
+        }
+    } catch (err) {
+        console.error('Register error:', err)
+        return {
+            success: false,
+            message: err.response?.data?.message || 'Registration failed. Please try again.',
+            error: err.response?.data || err.message
+        }
+    }
+}

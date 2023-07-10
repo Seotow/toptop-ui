@@ -185,3 +185,40 @@ export const unlikeComment = async (videoId, commentId) => {
         }
     }
 }
+
+export const getUserVideos = async (userId, page = 1) => {
+    try {
+        console.log('🔍 Fetching videos for user:', userId, 'page:', page)
+        const res = await request.get(`/users/${userId}/posts`, { 
+            params: { page } 
+        })
+        
+        console.log('📦 User videos response:', res.data)
+        
+        // Handle different response structures
+        let videoData = []
+        if (res.data?.data) {
+            videoData = res.data.data
+        } else if (Array.isArray(res.data)) {
+            videoData = res.data
+        } else if (res.data) {
+            videoData = [res.data]
+        }
+        
+        return {
+            success: true,
+            data: {
+                data: videoData,
+                meta: res.data?.meta || {}
+            }
+        }
+    } catch (err) {
+        console.error('❌ Get user videos error:', err)
+        console.error('❌ Error response:', err.response?.data)
+        return {
+            success: false,
+            data: [],
+            error: err.message
+        }
+    }
+}

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react'
-import { getCookie, getLocalStorage, removeCookie, removeLocalStorage } from '~/utils/storage'
+import { getCookie, getLocalStorage, removeCookie, removeLocalStorage, setLocalStorage } from '~/utils/storage'
 import * as authService from '~/services/authService'
+import * as userService from '~/services/userService'
 
 // Create the main app context
 const AppContext = createContext()
@@ -219,12 +220,76 @@ export const AppProvider = ({ children }) => {
         }
     }
 
+    const register = async (credentials) => {
+        dispatch({ type: actionTypes.SET_LOADING, payload: true })
+        dispatch({ type: actionTypes.CLEAR_ERROR })
+
+        try {
+            const result = await authService.register(credentials)
+            
+            if (result.success) {
+                dispatch({ 
+                    type: actionTypes.LOGIN_SUCCESS, 
+                    payload: result.data 
+                })
+                return { success: true }
+            } else {
+                dispatch({ 
+                    type: actionTypes.SET_ERROR, 
+                    payload: result.message 
+                })
+                return { success: false, message: result.message }
+            }
+        } catch (error) {
+            const errorMessage = 'An unexpected error occurred. Please try again.'
+            dispatch({ 
+                type: actionTypes.SET_ERROR, 
+                payload: errorMessage 
+            })
+            return { success: false, message: errorMessage }
+        }
+    }
+
     // User actions
     const updateUser = (userData) => {
         dispatch({ 
             type: actionTypes.UPDATE_USER, 
             payload: userData 
         })
+        // Also update localStorage to keep data in sync
+        if (userData) {
+            setLocalStorage('user', { ...state.currentUser, ...userData })
+        }
+    }
+
+    const updateProfile = async (formData) => {
+        dispatch({ type: actionTypes.SET_LOADING, payload: true })
+        dispatch({ type: actionTypes.CLEAR_ERROR })
+
+        try {
+            const result = await userService.updateProfile(formData)
+            
+            if (result.success) {
+                // Update user in context and localStorage
+                updateUser(result.data)
+                return { success: true, data: result.data }
+            } else {
+                dispatch({ 
+                    type: actionTypes.SET_ERROR, 
+                    payload: result.error 
+                })
+                return { success: false, message: result.error }
+            }
+        } catch (error) {
+            const errorMessage = 'Failed to update profile. Please try again.'
+            dispatch({ 
+                type: actionTypes.SET_ERROR, 
+                payload: errorMessage 
+            })
+            return { success: false, message: errorMessage }
+        } finally {
+            dispatch({ type: actionTypes.SET_LOADING, payload: false })
+        }
     }
 
     // App state actions
@@ -252,8 +317,7 @@ export const AppProvider = ({ children }) => {
         dispatch({ 
             type: actionTypes.SET_MODAL_STATE, 
             payload: modalState 
-        })
-    }
+        })    }
 
     const clearError = () => {
         dispatch({ type: actionTypes.CLEAR_ERROR })
@@ -266,11 +330,13 @@ export const AppProvider = ({ children }) => {
         
         // Auth actions
         login,
+        register,
         logout: handleLogout,
         clearError,
         
         // User actions
         updateUser,
+        updateProfile,
         
         // App actions
         setTheme,

@@ -1,6 +1,6 @@
 function Live() {
     return (
-        <div>Live</div>
+        <div></div>
     );
 }
 

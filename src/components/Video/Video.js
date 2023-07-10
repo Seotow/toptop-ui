@@ -21,7 +21,7 @@ const formatCount = (count) => {
     return count?.toString() || '0';
 };
 
-function Video({ data, autoPlay = false, muted = true, onVideoEnd }) {
+function Video({ data, autoPlay = false, muted = true, onVideoEnd, onVideoClick }) {
     const videoRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isMuted, setIsMuted] = useState(muted);
@@ -147,14 +147,20 @@ function Video({ data, autoPlay = false, muted = true, onVideoEnd }) {
         const rect = e.currentTarget.getBoundingClientRect();
         const percent = (e.clientX - rect.left) / rect.width;
         video.currentTime = percent * video.duration;
-    };
-
-    const handleVideoClick = (e) => {
+    };    const handleVideoClick = (e) => {
+        // If onVideoClick prop is provided (e.g., from Profile page), use that instead
+        if (onVideoClick) {
+            e.preventDefault();
+            e.stopPropagation();
+            onVideoClick(data);
+            return;
+        }
+        
         // Only toggle play if clicking directly on video, not on controls
         if (e.target === videoRef.current) {
             togglePlay(e);
         }
-    };    const handleCommentClick = (e) => {
+    };const handleCommentClick = (e) => {
         e?.stopPropagation();
         setShowComments(true);
     };
@@ -233,14 +239,14 @@ function Video({ data, autoPlay = false, muted = true, onVideoEnd }) {
                 </div>
             </div>
         );
-    }
-
-    return (
+    }    return (
         <div 
             className={cx('video-container')}
             onMouseEnter={() => setShowControls(true)}
             onMouseLeave={() => setShowControls(false)}
             onClick={handleVideoClick}
+            style={onVideoClick ? { cursor: 'pointer' } : {}}
+            // Remove onWheel here to allow video navigation scrolling
         >
             <video
                 ref={videoRef}
@@ -268,11 +274,9 @@ function Video({ data, autoPlay = false, muted = true, onVideoEnd }) {
                         <small>{videoUrl}</small>
                     </div>
                 </div>
-            )}
-
-            {/* Video controls */}
+            )}            {/* Video controls */}
             {showControls && !isLoading && !hasError && (
-                <div className={cx('controls')}>
+                <div className={cx('controls')} onWheel={(e) => e.stopPropagation()}>
                     <button
                         className={cx('play-button')}
                         onClick={togglePlay}
@@ -326,10 +330,8 @@ function Video({ data, autoPlay = false, muted = true, onVideoEnd }) {
                             <span>♪ {data.music}</span>
                         </div>
                     )}
-                </div>
-
-                {/* Action buttons */}
-                <div className={cx('actions')}>
+                </div>                {/* Action buttons */}
+                <div className={cx('actions')} onWheel={(e) => e.stopPropagation()}>
                     <div className={cx('action-item')} onClick={handleLikeClick}>
                         <div className={cx('action-btn', { liked: isLiked, loading: likeLoading })}>
                             <FontAwesomeIcon icon={faHeart} />

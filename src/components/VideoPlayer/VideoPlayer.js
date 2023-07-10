@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import classNames from 'classnames/bind'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
@@ -23,6 +24,7 @@ const cx = classNames.bind(styles)
 
 function VideoPlayer({ video, isActive, onVideoEnd, onCommentsToggle }) {
     const videoRef = useRef()
+    const navigate = useNavigate()
     const [isPlaying, setIsPlaying] = useState(false)
     const [volume, setVolume] = useState(0.5)
     const [isLiked, setIsLiked] = useState(video?.is_liked || false)
@@ -279,8 +281,7 @@ function VideoPlayer({ video, isActive, onVideoEnd, onCommentsToggle }) {
                 if (result.success) {
                     setIsFollowing(true)
                 }
-            }
-        } catch (error) {
+            }        } catch (error) {
             console.error('Follow/Unfollow error:', error)
         } finally {
             setFollowLoading(false)
@@ -313,6 +314,13 @@ function VideoPlayer({ video, isActive, onVideoEnd, onCommentsToggle }) {
         console.log('Comments panel should now be visible:', newShowComments)
     }
 
+    const handleUserClick = (e) => {
+        e?.stopPropagation()
+        if (video?.user?.nickname) {
+            navigate(`/@${video.user.nickname}`)
+        }
+    }
+
     if (!video) {
         return (
             <div className={cx('video-player')}>
@@ -326,8 +334,7 @@ function VideoPlayer({ video, isActive, onVideoEnd, onCommentsToggle }) {
     if (!videoUrl) {
         return (
             <div className={cx('video-player')}>
-                <div className={cx('video-container', 'no-video')}>
-                    <div className={cx('error-message')}>
+                <div className={cx('video-container', 'no-video')}>                    <div className={cx('error-message')}>
                         <p>Video URL not found</p>
                         <small>Available properties: {Object.keys(video).join(', ')}</small>
                     </div>
@@ -335,9 +342,13 @@ function VideoPlayer({ video, isActive, onVideoEnd, onCommentsToggle }) {
             </div>
         )
     }
+
     return (
         <div className={cx('video-player', { 'with-comments': showComments })}>
-            <div className={cx('video-container')}>
+            <div 
+                className={cx('video-container')}
+                // Remove onWheel here to allow video navigation scrolling
+            >
                 {isLoading && (
                     <div className={cx('loading-overlay')}>
                         <div className={cx('spinner')}></div>
@@ -370,19 +381,18 @@ function VideoPlayer({ video, isActive, onVideoEnd, onCommentsToggle }) {
                             <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
                         </button>
                     </div>
-                )}
-                {/* Progress bar */}
+                )}                {/* Progress bar */}
                 <div
                     className={cx('progress-bar')}
                     onClick={handleProgressClick}
                     onMouseDown={handleMouseDown}
+                    onWheel={(e) => e.stopPropagation()} // Prevent wheel on progress bar
                     title="Click or drag to seek"
                     ref={progressBarRef}
                 >
                     <div className={cx('progress')} style={{ width: `${(currentTime / duration) * 100}%` }} />
-                </div>
-                {/* Volume control */}
-                <div className={cx('volume-control')}>
+                </div>                {/* Volume control */}
+                <div className={cx('volume-control')} onWheel={(e) => e.stopPropagation()}>
                     <button className={cx('mute-btn')} onClick={handleMuteToggle} title={isMuted ? 'Unmute' : 'Mute'}>
                         {isMuted || volume === 0 ? (
                             <FontAwesomeIcon icon={faVolumeMute} />
@@ -406,14 +416,14 @@ function VideoPlayer({ video, isActive, onVideoEnd, onCommentsToggle }) {
                     <span className={cx('volume-label')}>{Math.round((isMuted ? 0 : volume) * 100)}%</span>
                 </div>
                 {/* Video info and action buttons as overlays */}
-                <div className={cx('video-info')}>
-                    <div className={cx('author-info')}>
+                <div className={cx('video-info')}>                    <div className={cx('author-info')}>
                         <Image
                             className={cx('avatar')}
                             src={video?.user?.avatar}
                             alt={video?.user?.nickname || 'User avatar'}
+                            onClick={handleUserClick}
                         />
-                        <div className={cx('author-details')}>
+                        <div className={cx('author-details')} onClick={handleUserClick}>
                             <h3 className={cx('nickname')}>{video?.user?.nickname || 'Unknown User'}</h3>
                             <p className={cx('name')}>
                                 {video?.user?.first_name && video?.user?.last_name
@@ -444,7 +454,7 @@ function VideoPlayer({ video, isActive, onVideoEnd, onCommentsToggle }) {
                         )}
                     </div>
                 </div>
-                <div className={cx('action-buttons')}>
+                <div className={cx('action-buttons')} onWheel={(e) => e.stopPropagation()}>
                     <button
                         className={cx('action-btn', { liked: isLiked, loading: likeLoading })}
                         onClick={handleLike}
