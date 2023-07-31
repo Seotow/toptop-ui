@@ -1,70 +1,144 @@
-# Getting Started with Create React App
+# TopTop UI - Ứng dụng chia sẻ video ngắn
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Ứng dụng chia sẻ video ngắn tương tự TikTok được xây dựng bằng React.js sử dụng api của fullstack.edu.vn (F8)
 
-## Available Scripts
+## Tính năng chính
 
-In the project directory, you can run:
+### Giao diện người dùng
+- **Giao diện**: Sử dụng SCSS modules 
+- **Animations**: Hiệu ứng chuyển đổi và loading
 
-### `npm start`
+### Quản lý Video
+- **Phát video tự động**: Phát video khi cuộn đến
+- **Điều khiển video**:
+  - Play/Pause bằng click hoặc spacebar
+  - Thanh progress bar có thể kéo thả để tua
+  - Điều khiển âm lượng với slider
+  - Tắt/bật tiếng (mute/unmute)
+  - Hiển thị thời gian video
+- **Video player**:
+  - Tự động loop
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Tải lên Video
+- **Upload**: Hỗ trợ drag & drop hoặc chọn file
+- **Định dạng**: MP4, AVI, MOV, WMV, FLV, WebM
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Tương tác xã hội
+- **Like/Unlike video**: Thích và bỏ thích video
+- **Bình luận**:
+  - Viết bình luận mới
+  - Like/unlike bình luận
+  - Hiển thị thời gian bình luận
+- **Follow/Unfollow**: Theo dõi và bỏ theo dõi người dùng
 
-### `npm test`
+### Trang chủ (For You)
+- **Feed**: Hiển thị video được đề xuất
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Trang Following
+- **Video từ người theo dõi**: Chỉ hiển thị video từ những người đã follow
 
-### `npm run build`
+### Trang Profile
+- **Thông tin cá nhân**:
+  - Avatar, tên, nickname
+  - Bio/mô tả bản thân
+  - Số video, followers, following
+  - Thông tin liên hệ (website, social media)
+- **Chỉnh sửa profile**:
+  - Cập nhật thông tin cá nhân
+  - Thay đổi avatar
+  - Chỉnh sửa ngày sinh, giới tính
+  - Thêm liên kết mạng xã hội
+- **Hiển thị video**: Video đã đăng
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Tìm kiếm
+- **Tìm kiếm người dùng**: Tìm kiếm theo nickname có gợi ý tài khoản
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Xác thực và phân quyền
+- **Đăng nhập/Đăng ký**: Hệ thống authentication
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Công nghệ sử dụng
 
-### `npm run eject`
+### Frontend Framework
+- **React 18.2.0**: Framework chính
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Styling
+- **SCSS**: CSS preprocessor
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Cài đặt và chạy dự án
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Yêu cầu hệ thống
+- Node.js 14.0.0 trở lên
+- npm hoặc yarn
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Cài đặt dependencies
+```bash
+npm install
+```
 
-## Learn More
+### Chạy môi trường development
+```bash
+npm start
+```
+Ứng dụng sẽ chạy tại [http://localhost:3000](http://localhost:3000)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Cấu trúc dự án
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```
+src/
+├── components/          # Các component tái sử dụng
+│   ├── VideoPlayer/     # Component phát video chính
+│   ├── Comments/        # Hệ thống bình luận
+│   ├── Image/          # Component hiển thị ảnh
+│   ├── Button/         # Các loại nút
+│   └── ...
+├── pages/              # Các trang chính
+│   ├── Home/           # Trang chủ (For You)
+│   ├── Following/      # Video từ người theo dõi
+│   ├── Profile/        # Trang cá nhân
+│   ├── Upload/         # Trang upload video
+│   └── ...
+├── services/           # API services
+│   ├── videoService.js # APIs liên quan video
+│   ├── userService.js  # APIs liên quan user
+│   └── authService.js  # APIs xác thực
+├── hooks/              # Custom React hooks
+├── layouts/            # Layout components
+├── routes/             # Cấu hình routing
+├── store/              # State management
+├── utils/              # Utility functions
+└── assets/             # Static assets
+```
 
-### Code Splitting
+## Cấu hình
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Environment Variables
+Tạo file `.env` trong thư mục root:
+```env
+REACT_APP_API_URL=https://tiktok.fullstack.edu.vn/
+```
 
-### Analyzing the Bundle Size
+## API Integration
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Video APIs
+- `GET /videos` - Lấy danh sách video
+- `POST /videos` - Upload video mới
+- `POST /videos/:id/like` - Like video
+- `POST /videos/:id/unlike` - Unlike video
+- `GET /videos/:id/comments` - Lấy bình luận
+- `POST /videos/:id/comments` - Tạo bình luận mới
 
-### Making a Progressive Web App
+### User APIs
+- `GET /users/@:nickname` - Lấy thông tin user
+- `POST /users/:id/follow` - Follow user
+- `POST /users/:id/unfollow` - Unfollow user
+- `GET /me/followings` - Lấy danh sách đang follow
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### Auth APIs
+- `POST /auth/login` - Đăng nhập
+- `POST /auth/register` - Đăng ký
+- `POST /auth/logout` - Đăng xuất
+- `GET /auth/me` - Lấy thông tin user hiện tại
 
-### Advanced Configuration
+## Tác giả
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Được phát triển với ❤️ bởi Nguyễn Trung hiếu

@@ -51,6 +51,16 @@
     opacity: 1;
 }
 
+.avatarSection.dragOver {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+
+.avatarSection.dragOver .avatarOverlay {
+    opacity: 1;
+    background: rgba(254, 44, 85, 0.6);
+}
+
 .avatarInput {
     display: none;
 }
@@ -276,7 +286,6 @@
     text-align: center;
     padding: 40px;
     color: rgba(22, 24, 35, 0.7);
-    font-size: 16px;
 }
 
 .videosError {
@@ -284,6 +293,27 @@
     padding: 40px;
     color: rgb(254, 44, 85);
     font-size: 16px;
+
+    p {
+        margin-bottom: 16px;
+    }
+}
+
+.retryButton {
+    background: #fe2c55;
+    border: 1px solid #fe2c55;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background: #e02447;
+        border-color: #e02447;
+    }
 }
 
 .noVideos {
@@ -291,6 +321,93 @@
     padding: 40px;
     color: rgba(22, 24, 35, 0.5);
     font-size: 16px;
+
+    p {
+        margin: 0 0 8px 0;
+
+        &:last-child {
+            margin-bottom: 0;
+            font-size: 14px;
+            color: rgba(22, 24, 35, 0.4);
+        }
+    }
+}
+
+// Avatar upload area styles
+.avatarUploadArea {
+    border: 2px dashed rgba(22, 24, 35, 0.2);
+    border-radius: 8px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(22, 24, 35, 0.02);
+
+    &:hover {
+        border-color: rgba(254, 44, 85, 0.5);
+        background: rgba(254, 44, 85, 0.02);
+    }
+
+    &.dragOver {
+        border-color: rgba(254, 44, 85, 1);
+        background: rgba(254, 44, 85, 0.1);
+        transform: scale(1.02);
+    }
+}
+
+.avatarPreviewContainer {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.avatarPreview {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(22, 24, 35, 0.1);
+}
+
+.avatarUploadOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    padding: 8px;
+}
+
+.avatarUploadArea:hover .avatarUploadOverlay,
+.avatarUploadArea.dragOver .avatarUploadOverlay {
+    opacity: 1;
+}
+
+.avatarUploadText {
+    flex: 1;
+
+    p {
+        margin: 0 0 4px 0;
+        font-size: 14px;
+        color: rgba(22, 24, 35, 0.7);
+
+        &:first-child {
+            font-weight: 600;
+            color: rgba(22, 24, 35, 1);
+        }
+    }
 }
 
 // Responsive design

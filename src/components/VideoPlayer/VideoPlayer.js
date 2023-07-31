@@ -281,7 +281,8 @@ function VideoPlayer({ video, isActive, onVideoEnd, onCommentsToggle }) {
                 if (result.success) {
                     setIsFollowing(true)
                 }
-            }        } catch (error) {
+            }
+        } catch (error) {
             console.error('Follow/Unfollow error:', error)
         } finally {
             setFollowLoading(false)
@@ -334,7 +335,9 @@ function VideoPlayer({ video, isActive, onVideoEnd, onCommentsToggle }) {
     if (!videoUrl) {
         return (
             <div className={cx('video-player')}>
-                <div className={cx('video-container', 'no-video')}>                    <div className={cx('error-message')}>
+                <div className={cx('video-container', 'no-video')}>
+                    {' '}
+                    <div className={cx('error-message')}>
                         <p>Video URL not found</p>
                         <small>Available properties: {Object.keys(video).join(', ')}</small>
                     </div>
@@ -345,7 +348,7 @@ function VideoPlayer({ video, isActive, onVideoEnd, onCommentsToggle }) {
 
     return (
         <div className={cx('video-player', { 'with-comments': showComments })}>
-            <div 
+            <div
                 className={cx('video-container')}
                 // Remove onWheel here to allow video navigation scrolling
             >
@@ -381,7 +384,8 @@ function VideoPlayer({ video, isActive, onVideoEnd, onCommentsToggle }) {
                             <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
                         </button>
                     </div>
-                )}                {/* Progress bar */}
+                )}{' '}
+                {/* Progress bar */}
                 <div
                     className={cx('progress-bar')}
                     onClick={handleProgressClick}
@@ -391,7 +395,8 @@ function VideoPlayer({ video, isActive, onVideoEnd, onCommentsToggle }) {
                     ref={progressBarRef}
                 >
                     <div className={cx('progress')} style={{ width: `${(currentTime / duration) * 100}%` }} />
-                </div>                {/* Volume control */}
+                </div>{' '}
+                {/* Volume control */}
                 <div className={cx('volume-control')} onWheel={(e) => e.stopPropagation()}>
                     <button className={cx('mute-btn')} onClick={handleMuteToggle} title={isMuted ? 'Unmute' : 'Mute'}>
                         {isMuted || volume === 0 ? (
@@ -416,7 +421,9 @@ function VideoPlayer({ video, isActive, onVideoEnd, onCommentsToggle }) {
                     <span className={cx('volume-label')}>{Math.round((isMuted ? 0 : volume) * 100)}%</span>
                 </div>
                 {/* Video info and action buttons as overlays */}
-                <div className={cx('video-info')}>                    <div className={cx('author-info')}>
+                <div className={cx('video-info')}>
+                    {' '}
+                    <div className={cx('author-info')}>
                         <Image
                             className={cx('avatar')}
                             src={video?.user?.avatar}
@@ -443,7 +450,6 @@ function VideoPlayer({ video, isActive, onVideoEnd, onCommentsToggle }) {
                             </Button>
                         )}
                     </div>
-
                     <div className={cx('video-description')}>
                         <p>{video?.description}</p>
                         {video?.music && (
@@ -470,7 +476,8 @@ function VideoPlayer({ video, isActive, onVideoEnd, onCommentsToggle }) {
                     <button className={cx('action-btn')}>
                         <FontAwesomeIcon icon={faShare} />
                         <span>Share</span>
-                    </button>                </div>
+                    </button>{' '}
+                </div>
             </div>
         </div>
     )

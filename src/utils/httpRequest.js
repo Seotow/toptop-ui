@@ -6,8 +6,8 @@ const httpRequest = axios.create({
     timeout: 10000, // 10 seconds timeout
     headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
-    }
+        Accept: 'application/json',
+    },
 })
 
 // Add a request interceptor to include the latest token
@@ -17,11 +17,17 @@ httpRequest.interceptors.request.use(
         if (accessToken) {
             config.headers['Authorization'] = `Bearer ${accessToken}`
         }
+
+        // For FormData, let the browser set the Content-Type header with boundary
+        if (config.data instanceof FormData) {
+            delete config.headers['Content-Type']
+        }
+
         return config
     },
     (error) => {
         return Promise.reject(error)
-    }
+    },
 )
 
 // Add a response interceptor to handle token expiration and errors
@@ -31,36 +37,36 @@ httpRequest.interceptors.response.use(
     },
     async (error) => {
         const originalRequest = error.config
-        
+
         // Handle network errors
         if (!error.response) {
             console.error('Network error:', error.message)
             return Promise.reject(new Error('Network error. Please check your connection.'))
         }
-        
+
         // Handle 401 errors (unauthorized)
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true
-            
+
             // Clear invalid token without making logout API call
             removeCookie('token')
-            
+
             // Trigger silent logout event to update UI state
             window.dispatchEvent(new CustomEvent('auth:logout'))
-            
+
             return Promise.reject(new Error('Session expired. Please log in again.'))
         }
-        
+
         // Handle CORS errors
         if (error.message.includes('CORS')) {
             console.error('CORS error:', error.message)
             return Promise.reject(new Error('API access denied. Please check server configuration.'))
         }
-        
+
         // Handle other HTTP errors
         const message = error.response?.data?.message || error.message || 'An error occurred'
         return Promise.reject(new Error(message))
-    }
+    },
 )
 
 export const get = async (path, options = {}) => {

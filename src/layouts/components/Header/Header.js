@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAppContext } from '~/store'
 
 import Tippy from '@tippyjs/react/'
@@ -67,6 +67,12 @@ const MENU_ITEMS = [
 function Header() {
     const { isAuthenticated, currentUser, logout, isLoading, setLanguage } = useAppContext()
     const [isModalShowing, toggleShowModal] = useModal()
+    const navigate = useNavigate()
+
+    // Handle upload navigation
+    const handleUploadClick = () => {
+        navigate(config.routes.upload)
+    }
 
     // Handle logic menu items
     const handleMenuChange = (menuItem) => {
@@ -143,9 +149,8 @@ function Header() {
 
                 <div className={cx('actions')}>
                     {isAuthenticated && currentUser ? (
-                        <>
-                            <Tippy delay="200" content="Upload video" placement="bottom">
-                                <button className={cx('action-btn')}>
+                        <>                            <Tippy delay="200" content="Upload video" placement="bottom">
+                                <button className={cx('action-btn')} onClick={handleUploadClick}>
                                     <UploadIcon />
                                 </button>
                             </Tippy>
@@ -161,9 +166,8 @@ function Header() {
                                 </button>
                             </Tippy>
                         </>
-                    ) : (
-                        <>
-                            <Button outline leftIcon={<FontAwesomeIcon icon={faPlus} />}>
+                    ) : (                        <>
+                            <Button outline leftIcon={<FontAwesomeIcon icon={faPlus} />} onClick={handleUploadClick}>
                                 Upload
                             </Button>
                             <Button primary onClick={toggleShowModal}>
