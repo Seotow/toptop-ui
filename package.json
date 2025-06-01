@@ -26,12 +26,14 @@
   "devDependencies": {
     "babel-plugin-module-resolver": "^4.1.0",
     "customize-cra": "^1.0.0",
+    "http-proxy-middleware": "^3.0.5",
     "react-app-rewired": "^2.2.1",
     "sass": "^1.55.0"
   },
   "scripts": {
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
+    "build:prod": "REACT_APP_ENV=production react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject"
   },

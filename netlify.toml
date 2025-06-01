@@ -1,0 +1,35 @@
+[build]
+  publish = "build"
+  command = "npm run build"
+
+[build.environment]
+  REACT_APP_ENV = "production"
+  NODE_VERSION = "18"
+
+# Headers for security and CORS
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Redirect rules for API proxy
+[[redirects]]
+  from = "/api/*"
+  to = "https://tiktok.fullstack.edu.vn/api/:splat"
+  status = 200
+  force = true
+  headers = {X-From = "Netlify"}
+
+# SPA routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

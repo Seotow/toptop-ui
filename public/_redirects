@@ -1,0 +1,6 @@
+# Netlify redirects for SPA routing and API proxy
+# Proxy API calls to avoid CORS in production
+/api/* https://tiktok.fullstack.edu.vn/api/:splat 200
+
+# SPA fallback - must be last
+/* /index.html 200

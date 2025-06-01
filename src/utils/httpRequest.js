@@ -1,14 +1,37 @@
 import axios from 'axios'
 import { getCookie, removeCookie } from './storage'
 
+const getBaseURL = () => {
+    if (process.env.NODE_ENV === 'development') {
+        return '/api'
+    }
+    
+    const isHostedPlatform = window.location.hostname !== 'localhost' && 
+                            window.location.hostname !== '127.0.0.1' &&
+                            !window.location.hostname.includes('localhost');
+    
+    if (isHostedPlatform) {
+        return '/api'
+    }
+    
+    return process.env.REACT_APP_BASE_URL || 'https://tiktok.fullstack.edu.vn/api'
+}
+
 const httpRequest = axios.create({
-    baseURL: process.env.REACT_APP_BASE_URL || 'https://tiktok.fullstack.edu.vn/api',
+    baseURL: getBaseURL(),
     timeout: 10000, // 10 seconds timeout
     headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
     },
+    withCredentials: false,
 })
+
+if (process.env.NODE_ENV === 'development' || process.env.REACT_APP_DEBUG === 'true') {
+    console.log('HTTP Request Base URL:', getBaseURL())
+    console.log('Environment:', process.env.NODE_ENV)
+    console.log('Window location:', window.location.href)
+}
 
 // Add a request interceptor to include the latest token
 httpRequest.interceptors.request.use(
@@ -36,10 +59,20 @@ httpRequest.interceptors.response.use(
         return response
     },
     async (error) => {
-        const originalRequest = error.config
-
-        // Handle network errors
+        const originalRequest = error.config        // Handle network errors and CORS
         if (!error.response) {
+            if (error.message.includes('CORS') || 
+                error.message.includes('Network Error') ||
+                error.code === 'ERR_NETWORK') {
+                console.error('CORS/Network error:', error.message)
+                
+                if (process.env.NODE_ENV === 'development') {
+                    return Promise.reject(new Error('Network error. Make sure the development server is running with proxy configuration.'))
+                }
+                
+                return Promise.reject(new Error('API access denied. Please check your internet connection or contact support.'))
+            }
+            
             console.error('Network error:', error.message)
             return Promise.reject(new Error('Network error. Please check your connection.'))
         }
@@ -56,14 +89,6 @@ httpRequest.interceptors.response.use(
 
             return Promise.reject(new Error('Session expired. Please log in again.'))
         }
-
-        // Handle CORS errors
-        if (error.message.includes('CORS')) {
-            console.error('CORS error:', error.message)
-            return Promise.reject(new Error('API access denied. Please check server configuration.'))
-        }
-
-        // Handle other HTTP errors
         const message = error.response?.data?.message || error.message || 'An error occurred'
         return Promise.reject(new Error(message))
     },

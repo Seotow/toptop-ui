@@ -1,5 +1,7 @@
 # TopTop UI - Ứng dụng chia sẻ video ngắn
 
+**[Demo trực tiếp](https://brilliant-liger-ca8ef9.netlify.app/)** 
+
 Ứng dụng chia sẻ video ngắn tương tự TikTok được xây dựng bằng React.js sử dụng api của fullstack.edu.vn (F8)
 
 ## Tính năng chính
@@ -80,6 +82,39 @@ npm install
 npm start
 ```
 Ứng dụng sẽ chạy tại [http://localhost:3000](http://localhost:3000)
+
+### Build cho production
+```bash
+npm run build
+```
+
+## 🔧 Khắc phục sự cố
+
+### Lỗi CORS khi deploy
+Khi deploy ứng dụng, bạn có thể gặp lỗi CORS:
+```
+Access to XMLHttpRequest at 'https://tiktok.fullstack.edu.vn/...' from origin 'https://your-domain.com' has been blocked by CORS policy
+```
+
+**Nguyên nhân**: API của F8 chỉ cho phép truy cập từ localhost và một số domain được whitelist.
+
+**Giải pháp**:
+1. **Chạy local**: Tốt nhất là chạy ứng dụng ở localhost để trải nghiệm đầy đủ
+2. **Proxy server**: Có thể tạo một proxy server để bypass CORS
+3. **Fork và self-host**: Clone và host API riêng nếu có thể
+
+### Cài đặt cho development
+```bash
+# Clone repository
+git clone <your-repo-url>
+cd toptop-ui
+
+# Cài đặt dependencies
+npm install
+
+# Chạy development server
+npm start
+```
 
 ## Cấu trúc dự án
 
